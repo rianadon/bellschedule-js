@@ -9,7 +9,7 @@ There are two versions of the script.
 * [bellschedule.js](bellschedule.js) is the raw version, written using ES2015 syntax and APIs. As ES2015 is relatively new, this won't work in a lot of browsers (see below for estimated compatibility).
 * [bellschedule-compiled.js](bellschedule-compiled.js) is precompiled using [Babel](http://babeljs.io/) and includes the [Babel polyfill](http://babeljs.io/docs/usage/polyfill/) for ES2015 classes such as Map and Promise. It's a lot bigger (about 100 kb vs 8 kb), but should support every common browser out there.
 
-#### Estimated compatibility (from http://kangax.github.io/compat-table/es6/) and testing
+#### Estimated compatibility (from http://kangax.github.io/compat-table/es6 and testing)
 
 |     Edge     	|                 Firefox                	|                Chrome               	|                      Safari                      	| Any mobile browser 	|
 |:------------:	|:--------------------------------------:	|:-----------------------------------:	|:------------------------------------------------:	|--------------------	|
@@ -123,3 +123,23 @@ for (const period of bellSchedule.at(new Date())) {
 ```
 
 There's also the function `periods(schedule)` that returns a generator for the periods in a schedule, but it has no practical use besides being used in the `at(date)` function.
+
+### An Example
+The example below (which should run in browsers without ES2015 support) computes the time until the next period.
+```javascript
+var periods = Array.from(bellSchedule.at(new Date()));
+if(periods.length == 0) {
+  console.log("School is done (or hasn't started yet)!");
+} else {
+  // For simplicity just take the first period found
+  // In reality, the script should check whether the user has
+  // a period 5 or 6 and choose the right period accordingly
+  var currentPeriod = periods[0];
+  // Now compute the time difference
+  var time = currentPeriod.end.getTime() - Date.now();
+  // Split up the time
+  var hours = Math.floor(time / 3600);
+  var minutes = Math.floor(time % 3600 / 60);
+  console.log(hours + "minutes and " + minutes + " minutes remaining");
+}
+```
