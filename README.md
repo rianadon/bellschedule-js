@@ -127,19 +127,21 @@ There's also the function `periods(schedule)` that returns a generator for the p
 ### An Example
 The example below (which should run in browsers without ES2015 support) computes the time until the next period.
 ```javascript
-var periods = Array.from(bellSchedule.at(new Date()));
-if(periods.length == 0) {
-  console.log("School is done (or hasn't started yet)!");
-} else {
-  // For simplicity just take the first period found
-  // In reality, the script should check whether the user has
-  // a period 5 or 6 and choose the right period accordingly
-  var currentPeriod = periods[0];
-  // Now compute the time difference
-  var time = currentPeriod.end.getTime() - Date.now();
-  // Split up the time
-  var hours = Math.floor(time / 3600);
-  var minutes = Math.floor(time % 3600 / 60);
-  console.log(hours + "minutes and " + minutes + " minutes remaining");
-}
+bellSchedule.refresh().then(function() {
+  var periods = Array.from(bellSchedule.at(new Date()));
+  if(periods.length == 0) {
+    console.log("School is done (or hasn't started yet)!");
+  } else {
+    // For simplicity just take the first period found
+    // In reality, the script should check whether the user has
+    // a period 5 or 6 and choose the right period accordingly
+    var currentPeriod = periods[0];
+    // Now compute the time difference
+    var time = (currentPeriod.end.getTime() - Date.now())/1000;
+    // Split up the time
+    var hours = Math.floor(time / 3600);
+    var minutes = Math.floor(time % 3600 / 60);
+    console.log(hours + "minutes and " + minutes + " seconds remaining");
+  }
+}).
 ```
