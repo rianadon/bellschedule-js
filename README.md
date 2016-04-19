@@ -130,7 +130,7 @@ The example below (which should run in browsers without ES2015 support) computes
 bellSchedule.refresh().then(function() {
   var periods = Array.from(bellSchedule.at(new Date()));
   if(periods.length == 0) {
-    console.log("School is done (or hasn't started yet)!");
+    console.log("School is done (or hasn't started yet, or it's a passing periord)!");
   } else {
     // For simplicity just take the first period found
     // In reality, the script should check whether the user has
@@ -141,7 +141,8 @@ bellSchedule.refresh().then(function() {
     // Split up the time
     var hours = Math.floor(time / 3600);
     var minutes = Math.floor(time % 3600 / 60);
-    console.log(hours + "minutes and " + minutes + " seconds remaining");
+    var seconds = Math.floor(time - hours * 3600 - minutes * 60);
+    console.log(hours + " hours, " + minutes + " minutes, and "+seconds+" seconds remaining");
   }
-}).
+});
 ```
