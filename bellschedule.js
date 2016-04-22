@@ -48,11 +48,15 @@ window.bellSchedule = {
               }
             }
           }
+          const makeArray = (len, value) =>
+             Array.from(new Array(len), () => value);
+
           // Now parse the special schedules
           for (const rawschedule of days) {
             const day = rawschedule.split('\n');
             const scheduleName = day.shift(); // First line is the name of the schedule
             const schedule = [];
+            let lastTime; // The last parsed time of a period
             for (const period of day) {
               // Format is periodName\tTime
               const [periodName, time] = period.split('\t');
@@ -60,6 +64,8 @@ window.bellSchedule = {
                 const tracks = [];
                 const nameTracks = periodName.split('||');
                 const timeTracks = time.split('||');
+                // Create an array of blank arrays for the passing periods
+                const lastTrackTimes = makeArray(nameTracks.length, lastTime);
                 // Loop through the two tracks
                 for (let track = 0; track < nameTracks.length; track++) {
                   const trackPeriods = [];
@@ -68,6 +74,15 @@ window.bellSchedule = {
                   const timePeriods = timeTracks[track].split('|');
                   for (let ip = 0; ip < namePeriods.length; ip++) {
                     const times = timePeriods[ip].split('-');
+                    if (times[0] !== lastTrackTimes[track]) { // Passing period
+                      trackPeriods.push({
+                        type: 'period',
+                        name: null,
+                        start: lastTrackTimes[0],
+                        end: times[0],
+                      });
+                    }
+                    lastTrackTimes[track] = times[1];
                     trackPeriods.push({
                       type: 'period',
                       name: namePeriods[ip],
@@ -76,6 +91,7 @@ window.bellSchedule = {
                     });
                   }
                   tracks.push(trackPeriods);
+                  lastTime = Math.min(...lastTrackTimes);
                 }
                 // Now add the tracks to the schedule
                 schedule.push({
@@ -84,6 +100,15 @@ window.bellSchedule = {
                 });
               } else {
                 const times = time.split('-');
+                if (lastTime && times[0] !== lastTime) { // Add the passing period
+                  schedule.push({
+                    type: 'period',
+                    name: null,
+                    start: lastTime,
+                    end: times[0],
+                  });
+                }
+                lastTime = times[1];
                 schedule.push({
                   type: 'period',
                   name: periodName,
@@ -181,28 +206,84 @@ window.bellSchedule = {
     return {
       special: false,
       schedule: ret,
+      __proto__: {
+        /* Yields all periods in a schedule (expanding groups) */
+        * periods() {
+          for (const per of this.schedule) {
+            if (per.type === 'period') {
+              yield per;
+            } else { // A group
+              for (const track of per.tracks) {
+                for (const p of track) {
+                  yield p;
+                }
+              }
+            }
+          }
+        },
+        /* Gets the period(s) at a specific time */
+        * at(time) {
+          for (const period of this.periods()) {
+            if (period.start <= time && time < period.end) yield period;
+          }
+        },
+        /* Gets the period after the given one */
+        before(period) {
+          let lastPeriod;
+          for (const per of this.schedule) {
+            if (per.type === 'period') {
+              if (period === lastPeriod || ~lastPeriod.indexOf(period)) {
+                return per;
+              }
+              lastPeriod = per;
+            } else { // A group
+              const a = [];
+              for (const track of per.tracks) {
+                let innerLast = lastPeriod;
+                for (const p of track) {
+                  if (period === innerLast || ~innerLast.indexOf(period)) {
+                    return p;
+                  }
+                  innerLast = p;
+                }
+                a.push(innerLast);
+              }
+              lastPeriod = a;
+            }
+          }
+          return null;
+        },
+        /* Gets the period after the given one */
+        after(period) {
+          let lastPeriod;
+          for (const per of this.schedule) {
+            if (per.type === 'period') {
+              if (period === per) {
+                return lastPeriod;
+              }
+              lastPeriod = per;
+            } else { // A group
+              const a = [];
+              for (const track of per.tracks) {
+                let innerLast = lastPeriod;
+                for (const p of track) {
+                  if (period === p) {
+                    return innerLast;
+                  }
+                  innerLast = p;
+                }
+                a.push(innerLast);
+              }
+              lastPeriod = a;
+            }
+          }
+          return null;
+        },
+      },
     };
   },
-  /* Yields all periods in a schedule (expanding groups) */
-  * periods(schedule) {
-    for (const per of schedule) {
-      if (per.type === 'period') {
-        yield per;
-      } else { // A group
-        for (const track of per.tracks) {
-          for (const p of track) {
-            yield p;
-          }
-        }
-      }
-    }
-  },
   /* Gets the period(s) at a specific time */
-  * at(time) {
-    // No need to check if refresh() has been called as the for function will check
-    const schedule = this.for(time).schedule; // Get the schedule for the day
-    for (const period of this.periods(schedule)) {
-      if (period.start <= time && time < period.end) yield period;
-    }
+  at(time) {
+    return this.for(time).at(time);
   },
 };

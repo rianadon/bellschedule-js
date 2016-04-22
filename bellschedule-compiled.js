@@ -6,6 +6,8 @@ c(c.S,"Reflect",{set:set})},{31:31,38:38,48:48,66:66,69:69,73:73,8:8,84:84}],211
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 window.bellSchedule = {
   index: null,
   schedules: null,
@@ -100,7 +102,6 @@ window.bellSchedule = {
                 }
               }
             }
-            // Now parse the special schedules
           } catch (err) {
             _didIteratorError = true;
             _iteratorError = err;
@@ -116,6 +117,13 @@ window.bellSchedule = {
             }
           }
 
+          var makeArray = function makeArray(len, value) {
+            return Array.from(new Array(len), function () {
+              return value;
+            });
+          };
+
+          // Now parse the special schedules
           var _iteratorNormalCompletion2 = true;
           var _didIteratorError2 = false;
           var _iteratorError2 = undefined;
@@ -127,6 +135,7 @@ window.bellSchedule = {
               var day = rawschedule.split('\n');
               var scheduleName = day.shift(); // First line is the name of the schedule
               var schedule = [];
+              var lastTime = void 0; // The last parsed time of a period
               var _iteratorNormalCompletion4 = true;
               var _didIteratorError4 = false;
               var _iteratorError4 = undefined;
@@ -149,6 +158,8 @@ window.bellSchedule = {
                     var tracks = [];
                     var nameTracks = periodName.split('||');
                     var timeTracks = time.split('||');
+                    // Create an array of blank arrays for the passing periods
+                    var lastTrackTimes = makeArray(nameTracks.length, lastTime);
                     // Loop through the two tracks
                     for (var track = 0; track < nameTracks.length; track++) {
                       var trackPeriods = [];
@@ -157,6 +168,16 @@ window.bellSchedule = {
                       var timePeriods = timeTracks[track].split('|');
                       for (var ip = 0; ip < namePeriods.length; ip++) {
                         var times = timePeriods[ip].split('-');
+                        if (times[0] !== lastTrackTimes[track]) {
+                          // Passing period
+                          trackPeriods.push({
+                            type: 'period',
+                            name: null,
+                            start: lastTrackTimes[0],
+                            end: times[0]
+                          });
+                        }
+                        lastTrackTimes[track] = times[1];
                         trackPeriods.push({
                           type: 'period',
                           name: namePeriods[ip],
@@ -165,6 +186,7 @@ window.bellSchedule = {
                         });
                       }
                       tracks.push(trackPeriods);
+                      lastTime = Math.min.apply(Math, _toConsumableArray(lastTrackTimes));
                     }
                     // Now add the tracks to the schedule
                     schedule.push({
@@ -173,6 +195,16 @@ window.bellSchedule = {
                     });
                   } else {
                     var _times = time.split('-');
+                    if (lastTime && _times[0] !== lastTime) {
+                      // Add the passing period
+                      schedule.push({
+                        type: 'period',
+                        name: null,
+                        start: lastTime,
+                        end: _times[0]
+                      });
+                    }
+                    lastTime = _times[1];
                     schedule.push({
                       type: 'period',
                       name: periodName,
@@ -355,57 +387,57 @@ window.bellSchedule = {
 
     try {
       for (var _iterator8 = ret[Symbol.iterator](), _step8; !(_iteratorNormalCompletion8 = (_step8 = _iterator8.next()).done); _iteratorNormalCompletion8 = true) {
-        var _per = _step8.value;
+        var _per4 = _step8.value;
 
-        if (_per.type === 'period') {
-          _per.start = getDateFromString(_per.start, d);
-          _per.end = getDateFromString(_per.end, d);
+        if (_per4.type === 'period') {
+          _per4.start = getDateFromString(_per4.start, d);
+          _per4.end = getDateFromString(_per4.end, d);
         } else {
           // It's a group
-          var _iteratorNormalCompletion9 = true;
-          var _didIteratorError9 = false;
-          var _iteratorError9 = undefined;
+          var _iteratorNormalCompletion19 = true;
+          var _didIteratorError19 = false;
+          var _iteratorError19 = undefined;
 
           try {
-            for (var _iterator9 = _per.tracks[Symbol.iterator](), _step9; !(_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done); _iteratorNormalCompletion9 = true) {
-              var _track = _step9.value;
-              var _iteratorNormalCompletion10 = true;
-              var _didIteratorError10 = false;
-              var _iteratorError10 = undefined;
+            for (var _iterator19 = _per4.tracks[Symbol.iterator](), _step19; !(_iteratorNormalCompletion19 = (_step19 = _iterator19.next()).done); _iteratorNormalCompletion19 = true) {
+              var _track4 = _step19.value;
+              var _iteratorNormalCompletion20 = true;
+              var _didIteratorError20 = false;
+              var _iteratorError20 = undefined;
 
               try {
-                for (var _iterator10 = _track[Symbol.iterator](), _step10; !(_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done); _iteratorNormalCompletion10 = true) {
-                  var _p = _step10.value;
+                for (var _iterator20 = _track4[Symbol.iterator](), _step20; !(_iteratorNormalCompletion20 = (_step20 = _iterator20.next()).done); _iteratorNormalCompletion20 = true) {
+                  var _p4 = _step20.value;
 
-                  _p.start = getDateFromString(_p.start, d);
-                  _p.end = getDateFromString(_p.end, d);
+                  _p4.start = getDateFromString(_p4.start, d);
+                  _p4.end = getDateFromString(_p4.end, d);
                 }
               } catch (err) {
-                _didIteratorError10 = true;
-                _iteratorError10 = err;
+                _didIteratorError20 = true;
+                _iteratorError20 = err;
               } finally {
                 try {
-                  if (!_iteratorNormalCompletion10 && _iterator10.return) {
-                    _iterator10.return();
+                  if (!_iteratorNormalCompletion20 && _iterator20.return) {
+                    _iterator20.return();
                   }
                 } finally {
-                  if (_didIteratorError10) {
-                    throw _iteratorError10;
+                  if (_didIteratorError20) {
+                    throw _iteratorError20;
                   }
                 }
               }
             }
           } catch (err) {
-            _didIteratorError9 = true;
-            _iteratorError9 = err;
+            _didIteratorError19 = true;
+            _iteratorError19 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion9 && _iterator9.return) {
-                _iterator9.return();
+              if (!_iteratorNormalCompletion19 && _iterator19.return) {
+                _iterator19.return();
               }
             } finally {
-              if (_didIteratorError9) {
-                throw _iteratorError9;
+              if (_didIteratorError19) {
+                throw _iteratorError19;
               }
             }
           }
@@ -428,278 +460,468 @@ window.bellSchedule = {
 
     return {
       special: false,
-      schedule: ret
+      schedule: ret,
+      __proto__: {
+        /* Yields all periods in a schedule (expanding groups) */
+
+        periods: regeneratorRuntime.mark(function periods() {
+          var _iteratorNormalCompletion9, _didIteratorError9, _iteratorError9, _iterator9, _step9, _per, _iteratorNormalCompletion10, _didIteratorError10, _iteratorError10, _iterator10, _step10, _track, _iteratorNormalCompletion11, _didIteratorError11, _iteratorError11, _iterator11, _step11, _p;
+
+          return regeneratorRuntime.wrap(function periods$(_context) {
+            while (1) {
+              switch (_context.prev = _context.next) {
+                case 0:
+                  _iteratorNormalCompletion9 = true;
+                  _didIteratorError9 = false;
+                  _iteratorError9 = undefined;
+                  _context.prev = 3;
+                  _iterator9 = this.schedule[Symbol.iterator]();
+
+                case 5:
+                  if (_iteratorNormalCompletion9 = (_step9 = _iterator9.next()).done) {
+                    _context.next = 65;
+                    break;
+                  }
+
+                  _per = _step9.value;
+
+                  if (!(_per.type === 'period')) {
+                    _context.next = 12;
+                    break;
+                  }
+
+                  _context.next = 10;
+                  return _per;
+
+                case 10:
+                  _context.next = 62;
+                  break;
+
+                case 12:
+                  // A group
+                  _iteratorNormalCompletion10 = true;
+                  _didIteratorError10 = false;
+                  _iteratorError10 = undefined;
+                  _context.prev = 15;
+                  _iterator10 = _per.tracks[Symbol.iterator]();
+
+                case 17:
+                  if (_iteratorNormalCompletion10 = (_step10 = _iterator10.next()).done) {
+                    _context.next = 48;
+                    break;
+                  }
+
+                  _track = _step10.value;
+                  _iteratorNormalCompletion11 = true;
+                  _didIteratorError11 = false;
+                  _iteratorError11 = undefined;
+                  _context.prev = 22;
+                  _iterator11 = _track[Symbol.iterator]();
+
+                case 24:
+                  if (_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done) {
+                    _context.next = 31;
+                    break;
+                  }
+
+                  _p = _step11.value;
+                  _context.next = 28;
+                  return _p;
+
+                case 28:
+                  _iteratorNormalCompletion11 = true;
+                  _context.next = 24;
+                  break;
+
+                case 31:
+                  _context.next = 37;
+                  break;
+
+                case 33:
+                  _context.prev = 33;
+                  _context.t0 = _context['catch'](22);
+                  _didIteratorError11 = true;
+                  _iteratorError11 = _context.t0;
+
+                case 37:
+                  _context.prev = 37;
+                  _context.prev = 38;
+
+                  if (!_iteratorNormalCompletion11 && _iterator11.return) {
+                    _iterator11.return();
+                  }
+
+                case 40:
+                  _context.prev = 40;
+
+                  if (!_didIteratorError11) {
+                    _context.next = 43;
+                    break;
+                  }
+
+                  throw _iteratorError11;
+
+                case 43:
+                  return _context.finish(40);
+
+                case 44:
+                  return _context.finish(37);
+
+                case 45:
+                  _iteratorNormalCompletion10 = true;
+                  _context.next = 17;
+                  break;
+
+                case 48:
+                  _context.next = 54;
+                  break;
+
+                case 50:
+                  _context.prev = 50;
+                  _context.t1 = _context['catch'](15);
+                  _didIteratorError10 = true;
+                  _iteratorError10 = _context.t1;
+
+                case 54:
+                  _context.prev = 54;
+                  _context.prev = 55;
+
+                  if (!_iteratorNormalCompletion10 && _iterator10.return) {
+                    _iterator10.return();
+                  }
+
+                case 57:
+                  _context.prev = 57;
+
+                  if (!_didIteratorError10) {
+                    _context.next = 60;
+                    break;
+                  }
+
+                  throw _iteratorError10;
+
+                case 60:
+                  return _context.finish(57);
+
+                case 61:
+                  return _context.finish(54);
+
+                case 62:
+                  _iteratorNormalCompletion9 = true;
+                  _context.next = 5;
+                  break;
+
+                case 65:
+                  _context.next = 71;
+                  break;
+
+                case 67:
+                  _context.prev = 67;
+                  _context.t2 = _context['catch'](3);
+                  _didIteratorError9 = true;
+                  _iteratorError9 = _context.t2;
+
+                case 71:
+                  _context.prev = 71;
+                  _context.prev = 72;
+
+                  if (!_iteratorNormalCompletion9 && _iterator9.return) {
+                    _iterator9.return();
+                  }
+
+                case 74:
+                  _context.prev = 74;
+
+                  if (!_didIteratorError9) {
+                    _context.next = 77;
+                    break;
+                  }
+
+                  throw _iteratorError9;
+
+                case 77:
+                  return _context.finish(74);
+
+                case 78:
+                  return _context.finish(71);
+
+                case 79:
+                case 'end':
+                  return _context.stop();
+              }
+            }
+          }, periods, this, [[3, 67, 71, 79], [15, 50, 54, 62], [22, 33, 37, 45], [38,, 40, 44], [55,, 57, 61], [72,, 74, 78]]);
+        }),
+
+        /* Gets the period(s) at a specific time */
+        at: regeneratorRuntime.mark(function at(time) {
+          var _iteratorNormalCompletion12, _didIteratorError12, _iteratorError12, _iterator12, _step12, period;
+
+          return regeneratorRuntime.wrap(function at$(_context2) {
+            while (1) {
+              switch (_context2.prev = _context2.next) {
+                case 0:
+                  _iteratorNormalCompletion12 = true;
+                  _didIteratorError12 = false;
+                  _iteratorError12 = undefined;
+                  _context2.prev = 3;
+                  _iterator12 = this.periods()[Symbol.iterator]();
+
+                case 5:
+                  if (_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done) {
+                    _context2.next = 13;
+                    break;
+                  }
+
+                  period = _step12.value;
+
+                  if (!(period.start <= time && time < period.end)) {
+                    _context2.next = 10;
+                    break;
+                  }
+
+                  _context2.next = 10;
+                  return period;
+
+                case 10:
+                  _iteratorNormalCompletion12 = true;
+                  _context2.next = 5;
+                  break;
+
+                case 13:
+                  _context2.next = 19;
+                  break;
+
+                case 15:
+                  _context2.prev = 15;
+                  _context2.t0 = _context2['catch'](3);
+                  _didIteratorError12 = true;
+                  _iteratorError12 = _context2.t0;
+
+                case 19:
+                  _context2.prev = 19;
+                  _context2.prev = 20;
+
+                  if (!_iteratorNormalCompletion12 && _iterator12.return) {
+                    _iterator12.return();
+                  }
+
+                case 22:
+                  _context2.prev = 22;
+
+                  if (!_didIteratorError12) {
+                    _context2.next = 25;
+                    break;
+                  }
+
+                  throw _iteratorError12;
+
+                case 25:
+                  return _context2.finish(22);
+
+                case 26:
+                  return _context2.finish(19);
+
+                case 27:
+                case 'end':
+                  return _context2.stop();
+              }
+            }
+          }, at, this, [[3, 15, 19, 27], [20,, 22, 26]]);
+        }),
+
+        /* Gets the period after the given one */
+        before: function before(period) {
+          var lastPeriod = void 0;
+          var _iteratorNormalCompletion13 = true;
+          var _didIteratorError13 = false;
+          var _iteratorError13 = undefined;
+
+          try {
+            for (var _iterator13 = this.schedule[Symbol.iterator](), _step13; !(_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done); _iteratorNormalCompletion13 = true) {
+              var _per2 = _step13.value;
+
+              if (_per2.type === 'period') {
+                if (period === lastPeriod || ~lastPeriod.indexOf(period)) {
+                  return _per2;
+                }
+                lastPeriod = _per2;
+              } else {
+                // A group
+                var a = [];
+                var _iteratorNormalCompletion14 = true;
+                var _didIteratorError14 = false;
+                var _iteratorError14 = undefined;
+
+                try {
+                  for (var _iterator14 = _per2.tracks[Symbol.iterator](), _step14; !(_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done); _iteratorNormalCompletion14 = true) {
+                    var _track2 = _step14.value;
+
+                    var innerLast = lastPeriod;
+                    var _iteratorNormalCompletion15 = true;
+                    var _didIteratorError15 = false;
+                    var _iteratorError15 = undefined;
+
+                    try {
+                      for (var _iterator15 = _track2[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
+                        var _p2 = _step15.value;
+
+                        if (period === innerLast || ~innerLast.indexOf(period)) {
+                          return _p2;
+                        }
+                        innerLast = _p2;
+                      }
+                    } catch (err) {
+                      _didIteratorError15 = true;
+                      _iteratorError15 = err;
+                    } finally {
+                      try {
+                        if (!_iteratorNormalCompletion15 && _iterator15.return) {
+                          _iterator15.return();
+                        }
+                      } finally {
+                        if (_didIteratorError15) {
+                          throw _iteratorError15;
+                        }
+                      }
+                    }
+
+                    a.push(innerLast);
+                  }
+                } catch (err) {
+                  _didIteratorError14 = true;
+                  _iteratorError14 = err;
+                } finally {
+                  try {
+                    if (!_iteratorNormalCompletion14 && _iterator14.return) {
+                      _iterator14.return();
+                    }
+                  } finally {
+                    if (_didIteratorError14) {
+                      throw _iteratorError14;
+                    }
+                  }
+                }
+
+                lastPeriod = a;
+              }
+            }
+          } catch (err) {
+            _didIteratorError13 = true;
+            _iteratorError13 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion13 && _iterator13.return) {
+                _iterator13.return();
+              }
+            } finally {
+              if (_didIteratorError13) {
+                throw _iteratorError13;
+              }
+            }
+          }
+
+          return null;
+        },
+
+        /* Gets the period after the given one */
+        after: function after(period) {
+          var lastPeriod = void 0;
+          var _iteratorNormalCompletion16 = true;
+          var _didIteratorError16 = false;
+          var _iteratorError16 = undefined;
+
+          try {
+            for (var _iterator16 = this.schedule[Symbol.iterator](), _step16; !(_iteratorNormalCompletion16 = (_step16 = _iterator16.next()).done); _iteratorNormalCompletion16 = true) {
+              var _per3 = _step16.value;
+
+              if (_per3.type === 'period') {
+                if (period === _per3) {
+                  return lastPeriod;
+                }
+                lastPeriod = _per3;
+              } else {
+                // A group
+                var a = [];
+                var _iteratorNormalCompletion17 = true;
+                var _didIteratorError17 = false;
+                var _iteratorError17 = undefined;
+
+                try {
+                  for (var _iterator17 = _per3.tracks[Symbol.iterator](), _step17; !(_iteratorNormalCompletion17 = (_step17 = _iterator17.next()).done); _iteratorNormalCompletion17 = true) {
+                    var _track3 = _step17.value;
+
+                    var innerLast = lastPeriod;
+                    var _iteratorNormalCompletion18 = true;
+                    var _didIteratorError18 = false;
+                    var _iteratorError18 = undefined;
+
+                    try {
+                      for (var _iterator18 = _track3[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
+                        var _p3 = _step18.value;
+
+                        if (period === _p3) {
+                          return innerLast;
+                        }
+                        innerLast = _p3;
+                      }
+                    } catch (err) {
+                      _didIteratorError18 = true;
+                      _iteratorError18 = err;
+                    } finally {
+                      try {
+                        if (!_iteratorNormalCompletion18 && _iterator18.return) {
+                          _iterator18.return();
+                        }
+                      } finally {
+                        if (_didIteratorError18) {
+                          throw _iteratorError18;
+                        }
+                      }
+                    }
+
+                    a.push(innerLast);
+                  }
+                } catch (err) {
+                  _didIteratorError17 = true;
+                  _iteratorError17 = err;
+                } finally {
+                  try {
+                    if (!_iteratorNormalCompletion17 && _iterator17.return) {
+                      _iterator17.return();
+                    }
+                  } finally {
+                    if (_didIteratorError17) {
+                      throw _iteratorError17;
+                    }
+                  }
+                }
+
+                lastPeriod = a;
+              }
+            }
+          } catch (err) {
+            _didIteratorError16 = true;
+            _iteratorError16 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion16 && _iterator16.return) {
+                _iterator16.return();
+              }
+            } finally {
+              if (_didIteratorError16) {
+                throw _iteratorError16;
+              }
+            }
+          }
+
+          return null;
+        }
+      }
     };
   },
-
-  /* Yields all periods in a schedule (expanding groups) */
-  periods: regeneratorRuntime.mark(function periods(schedule) {
-    var _iteratorNormalCompletion11, _didIteratorError11, _iteratorError11, _iterator11, _step11, per, _iteratorNormalCompletion12, _didIteratorError12, _iteratorError12, _iterator12, _step12, track, _iteratorNormalCompletion13, _didIteratorError13, _iteratorError13, _iterator13, _step13, p;
-
-    return regeneratorRuntime.wrap(function periods$(_context) {
-      while (1) {
-        switch (_context.prev = _context.next) {
-          case 0:
-            _iteratorNormalCompletion11 = true;
-            _didIteratorError11 = false;
-            _iteratorError11 = undefined;
-            _context.prev = 3;
-            _iterator11 = schedule[Symbol.iterator]();
-
-          case 5:
-            if (_iteratorNormalCompletion11 = (_step11 = _iterator11.next()).done) {
-              _context.next = 65;
-              break;
-            }
-
-            per = _step11.value;
-
-            if (!(per.type === 'period')) {
-              _context.next = 12;
-              break;
-            }
-
-            _context.next = 10;
-            return per;
-
-          case 10:
-            _context.next = 62;
-            break;
-
-          case 12:
-            // A group
-            _iteratorNormalCompletion12 = true;
-            _didIteratorError12 = false;
-            _iteratorError12 = undefined;
-            _context.prev = 15;
-            _iterator12 = per.tracks[Symbol.iterator]();
-
-          case 17:
-            if (_iteratorNormalCompletion12 = (_step12 = _iterator12.next()).done) {
-              _context.next = 48;
-              break;
-            }
-
-            track = _step12.value;
-            _iteratorNormalCompletion13 = true;
-            _didIteratorError13 = false;
-            _iteratorError13 = undefined;
-            _context.prev = 22;
-            _iterator13 = track[Symbol.iterator]();
-
-          case 24:
-            if (_iteratorNormalCompletion13 = (_step13 = _iterator13.next()).done) {
-              _context.next = 31;
-              break;
-            }
-
-            p = _step13.value;
-            _context.next = 28;
-            return p;
-
-          case 28:
-            _iteratorNormalCompletion13 = true;
-            _context.next = 24;
-            break;
-
-          case 31:
-            _context.next = 37;
-            break;
-
-          case 33:
-            _context.prev = 33;
-            _context.t0 = _context['catch'](22);
-            _didIteratorError13 = true;
-            _iteratorError13 = _context.t0;
-
-          case 37:
-            _context.prev = 37;
-            _context.prev = 38;
-
-            if (!_iteratorNormalCompletion13 && _iterator13.return) {
-              _iterator13.return();
-            }
-
-          case 40:
-            _context.prev = 40;
-
-            if (!_didIteratorError13) {
-              _context.next = 43;
-              break;
-            }
-
-            throw _iteratorError13;
-
-          case 43:
-            return _context.finish(40);
-
-          case 44:
-            return _context.finish(37);
-
-          case 45:
-            _iteratorNormalCompletion12 = true;
-            _context.next = 17;
-            break;
-
-          case 48:
-            _context.next = 54;
-            break;
-
-          case 50:
-            _context.prev = 50;
-            _context.t1 = _context['catch'](15);
-            _didIteratorError12 = true;
-            _iteratorError12 = _context.t1;
-
-          case 54:
-            _context.prev = 54;
-            _context.prev = 55;
-
-            if (!_iteratorNormalCompletion12 && _iterator12.return) {
-              _iterator12.return();
-            }
-
-          case 57:
-            _context.prev = 57;
-
-            if (!_didIteratorError12) {
-              _context.next = 60;
-              break;
-            }
-
-            throw _iteratorError12;
-
-          case 60:
-            return _context.finish(57);
-
-          case 61:
-            return _context.finish(54);
-
-          case 62:
-            _iteratorNormalCompletion11 = true;
-            _context.next = 5;
-            break;
-
-          case 65:
-            _context.next = 71;
-            break;
-
-          case 67:
-            _context.prev = 67;
-            _context.t2 = _context['catch'](3);
-            _didIteratorError11 = true;
-            _iteratorError11 = _context.t2;
-
-          case 71:
-            _context.prev = 71;
-            _context.prev = 72;
-
-            if (!_iteratorNormalCompletion11 && _iterator11.return) {
-              _iterator11.return();
-            }
-
-          case 74:
-            _context.prev = 74;
-
-            if (!_didIteratorError11) {
-              _context.next = 77;
-              break;
-            }
-
-            throw _iteratorError11;
-
-          case 77:
-            return _context.finish(74);
-
-          case 78:
-            return _context.finish(71);
-
-          case 79:
-          case 'end':
-            return _context.stop();
-        }
-      }
-    }, periods, this, [[3, 67, 71, 79], [15, 50, 54, 62], [22, 33, 37, 45], [38,, 40, 44], [55,, 57, 61], [72,, 74, 78]]);
-  }),
-
-  /* Gets the period(s) at a specific time */
-  at: regeneratorRuntime.mark(function at(time) {
-    var schedule, _iteratorNormalCompletion14, _didIteratorError14, _iteratorError14, _iterator14, _step14, period;
-
-    return regeneratorRuntime.wrap(function at$(_context2) {
-      while (1) {
-        switch (_context2.prev = _context2.next) {
-          case 0:
-            // No need to check if refresh() has been called as the for function will check
-            schedule = this.for(time).schedule; // Get the schedule for the day
-
-            _iteratorNormalCompletion14 = true;
-            _didIteratorError14 = false;
-            _iteratorError14 = undefined;
-            _context2.prev = 4;
-            _iterator14 = this.periods(schedule)[Symbol.iterator]();
-
-          case 6:
-            if (_iteratorNormalCompletion14 = (_step14 = _iterator14.next()).done) {
-              _context2.next = 14;
-              break;
-            }
-
-            period = _step14.value;
-
-            if (!(period.start <= time && time < period.end)) {
-              _context2.next = 11;
-              break;
-            }
-
-            _context2.next = 11;
-            return period;
-
-          case 11:
-            _iteratorNormalCompletion14 = true;
-            _context2.next = 6;
-            break;
-
-          case 14:
-            _context2.next = 20;
-            break;
-
-          case 16:
-            _context2.prev = 16;
-            _context2.t0 = _context2['catch'](4);
-            _didIteratorError14 = true;
-            _iteratorError14 = _context2.t0;
-
-          case 20:
-            _context2.prev = 20;
-            _context2.prev = 21;
-
-            if (!_iteratorNormalCompletion14 && _iterator14.return) {
-              _iterator14.return();
-            }
-
-          case 23:
-            _context2.prev = 23;
-
-            if (!_didIteratorError14) {
-              _context2.next = 26;
-              break;
-            }
-
-            throw _iteratorError14;
-
-          case 26:
-            return _context2.finish(23);
-
-          case 27:
-            return _context2.finish(20);
-
-          case 28:
-          case 'end':
-            return _context2.stop();
-        }
-      }
-    }, at, this, [[4, 16, 20, 28], [21,, 23, 27]]);
-  })
+  at: function at(time) {
+    return this.for(time).at(time);
+  }
 };
 

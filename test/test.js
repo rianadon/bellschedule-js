@@ -38,7 +38,7 @@ test('Error when schedule not fetched yet', (ft) => {
       }
     });
     test('At function works', (st) => {
-      st.plan(1);
+      st.plan(2);
       // Get the last Monday
       const date = new Date();
       date.setDate(date.getDate() + (date.getDay() === 0 ? -6 : 1 - date.getDay()));
@@ -46,6 +46,33 @@ test('Error when schedule not fetched yet', (ft) => {
       date.setHours(11, 45, 0, 0);
       console.log(`Date is ${date.toString()}`);
       st.equal([...bellSchedule.at(date)].length, 2, 'Number of periods is 2');
+
+      // At 1:50, it should be a passing period
+      date.setHours(13, 50);
+      console.log(`Date is now ${date.toString()}`);
+      st.equal(bellSchedule.at(date).next().value.name, null, 'Is a Passing period');
+    });
+    test('Next function works', (st) => {
+      st.plan(1);
+      // Again, last Monday
+      const date = new Date();
+      date.setDate(date.getDate() + (date.getDay() === 0 ? -6 : 1 - date.getDay()));
+      // Now get the schedule for that date
+      const sch = bellSchedule.for(date);
+      const period1 = sch.schedule[0];
+      const period2 = sch.schedule[1];
+      st.equal(sch.after(period1), period2, 'Second period comes after the first one');
+    });
+    test('Before function works', (st) => {
+      st.plan(1);
+      // Again, last Monday
+      const date = new Date();
+      date.setDate(date.getDate() + (date.getDay() === 0 ? -6 : 1 - date.getDay()));
+      // Now get the schedule for that date
+      const sch = bellSchedule.for(date);
+      const period1 = sch.schedule[0];
+      const period2 = sch.schedule[1];
+      st.equal(sch.before(period2), period1, 'Second period comes after the first one');
     });
   });
 });

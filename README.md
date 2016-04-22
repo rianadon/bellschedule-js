@@ -46,7 +46,7 @@ The keys are the names of the schedules, which are strings. The values are of th
 ```typescript
 interface Period { // The interface for periods that make up the schedule
   type: 'period'; // To designate this as a period and not a group
-  name: string;
+  name: string | null; // Name of the period (but null means passing period)
   start: string; // The start time, in form h:mm
   end: string; // Same format as the start time
 }
@@ -74,6 +74,11 @@ The function returns an object with the following properties:
 interface forFunctionReturnValue {
   special: boolean; // Whether this is a special schedule or not
   schedule: ModifiedScheduleValue;
+  __proto__: {
+    at: (time: Date) => Iterable<Period>;
+    before: (period: Period) => Period | Period[] | null;
+    after: (period: Period) => Period | Period[] | null;
+  }
 }
 ```
 
@@ -81,6 +86,17 @@ The `ModifiedScheduleValue` type is the type of a value from the `schedules` map
 
   * The names of the periods are changed according to the mapping
   * The start and end times are converted into `Date`s
+
+The return value also has a few functions in its prototype, documented below.
+
+###### `at(date)`
+Returns the same value as `bellSchedule.at`, but uses `this.schedule` rather than computing it again.
+
+###### `before(period)`
+Returns the period that comes before `period`. The function might return multiple values if the previous period is part of a group.
+
+###### `after(period)`
+Returns the period that comes after `period`. The function might return multiple values if the next period is part of a group.
 
 #### `at(date)`
 Returns a generator that yields the periods intersecting `date` of type `Date`.
@@ -90,7 +106,7 @@ Ther period will be taken from whatever `for(date)` returns, as shown below:
 ```typescript
 interface Period {
   type: 'period'; // You can ignore this
-  name: string;
+  name: string | null;
   start: Date;
   end: Date;
 }
@@ -130,7 +146,7 @@ The example below (which should run in browsers without ES2015 support) computes
 bellSchedule.refresh().then(function() {
   var periods = Array.from(bellSchedule.at(new Date()));
   if(periods.length == 0) {
-    console.log("School is done (or hasn't started yet, or it's a passing periord)!");
+    console.log("School is done (or hasn't started yet)!");
   } else {
     // For simplicity just take the first period found
     // In reality, the script should check whether the user has
@@ -142,6 +158,13 @@ bellSchedule.refresh().then(function() {
     var hours = Math.floor(time / 3600);
     var minutes = Math.floor(time % 3600 / 60);
     var seconds = Math.floor(time - hours * 3600 - minutes * 60);
+    if(currentPeriod.name) {
+      // It's an actual period
+      console.log(currentPeriod.name);
+    } else {
+      // It's a passing period
+      console.log('passing period');
+    }
     console.log(hours + " hours, " + minutes + " minutes, and "+seconds+" seconds remaining");
   }
 });

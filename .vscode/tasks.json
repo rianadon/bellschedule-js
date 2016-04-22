@@ -26,6 +26,10 @@
 		{
 			"taskName": "build-test",
 			"args": ["run", "build-test"]
+		},
+		{
+			"taskName": "lint",
+			"args": ["run", "lint"]
 		}
 	]
 }
