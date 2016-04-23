@@ -5,10 +5,14 @@ This is a simple JavaScript utility to fetch the schedule from [HarkerDev/bellsc
 
 ### Downloading
 
-There are two versions of the script.
+There are two (technically three) versions of the script.
 
-* [bellschedule.js](bellschedule.js) is the raw version, written using ES2015 syntax and APIs. As ES2015 is relatively new, this won't work in a lot of browsers (see below for estimated compatibility).
-* [bellschedule-compiled.js](bellschedule-compiled.js) is precompiled using [Babel](http://babeljs.io/) and includes the [Babel polyfill](http://babeljs.io/docs/usage/polyfill/) for ES2015 classes such as Map and Promise. It's a lot bigger (about 100 kb vs 8 kb), but should support every common browser out there.
+* [dist/bellschedule.js](dist/bellschedule.js) is the raw version, written using ES2015 syntax and APIs.
+  As ES2015 is relatively new, this won't work in a lot of browsers (see below for estimated compatibility).
+  This is the same file as [bellschedule.js](bellschedule.js) in the root directory, but put in `dist` for convenience.
+* [dist/bellschedule-compiled.js](dist/bellschedule-compiled.js) is precompiled using [Babel](http://babeljs.io/) and includes the [Babel polyfill](http://babeljs.io/docs/usage/polyfill/) for ES2015 classes such as Map and Promise.
+  It's a lot bigger (about 100 kb vs 8 kb), but should support every common browser out there.
+* There's also [dist/bellschedule-compiled.min.js](dist/bellschedule-compiled.min.js), which is a minfied, compressed, mangled version (through [UglifyJS](https://github.com/mishoo/UglifyJS2)) of [dist/bellschedule-compiled.js](dist/bellschedule-compiled.js).
 
 #### Estimated compatibility (from http://kangax.github.io/compat-table/es6 and testing)
 
