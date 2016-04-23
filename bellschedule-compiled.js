@@ -730,8 +730,10 @@ window.bellSchedule = {
           }, at, this, [[3, 15, 19, 27], [20,, 22, 26]]);
         }),
 
-        /* Gets the period after the given one */
+        /* Gets the period before the given one */
         before: function before(period) {
+          var passing = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
           var lastPeriod = void 0;
           var _iteratorNormalCompletion13 = true;
           var _didIteratorError13 = false;
@@ -742,10 +744,13 @@ window.bellSchedule = {
               var _per2 = _step13.value;
 
               if (_per2.type === 'period') {
-                if (period === lastPeriod || ~lastPeriod.indexOf(period)) {
-                  return _per2;
+                if (period === _per2) {
+                  return lastPeriod;
                 }
-                lastPeriod = _per2;
+                // If passing is false (no passing periods) then not a passing period
+                if (passing || _per2.name) {
+                  lastPeriod = _per2;
+                }
               } else {
                 // A group
                 var a = [];
@@ -766,10 +771,13 @@ window.bellSchedule = {
                       for (var _iterator15 = _track2[Symbol.iterator](), _step15; !(_iteratorNormalCompletion15 = (_step15 = _iterator15.next()).done); _iteratorNormalCompletion15 = true) {
                         var _p2 = _step15.value;
 
-                        if (period === innerLast || ~innerLast.indexOf(period)) {
-                          return _p2;
+                        // Period could be a passing period, so this shouldn't go inside the if below
+                        if (period === _p2) {
+                          return innerLast;
                         }
-                        innerLast = _p2;
+                        if (passing || _p2.name) {
+                          innerLast = _p2;
+                        }
                       }
                     } catch (err) {
                       _didIteratorError15 = true;
@@ -826,6 +834,11 @@ window.bellSchedule = {
 
         /* Gets the period after the given one */
         after: function after(period) {
+          var passing = arguments.length <= 1 || arguments[1] === undefined ? true : arguments[1];
+
+          function check(i, a) {
+            return i && (i === a || i.indexOf && ~i.indexOf(a));
+          }
           var lastPeriod = void 0;
           var _iteratorNormalCompletion16 = true;
           var _didIteratorError16 = false;
@@ -836,9 +849,13 @@ window.bellSchedule = {
               var _per3 = _step16.value;
 
               if (_per3.type === 'period') {
-                if (period === _per3) {
-                  return lastPeriod;
+                // If passing is false (no passing periods) then not a passing period
+                if (passing || _per3.name) {
+                  if (check(lastPeriod, period)) {
+                    return _per3;
+                  }
                 }
+                // This goes outside because period could be a passing period
                 lastPeriod = _per3;
               } else {
                 // A group
@@ -860,8 +877,10 @@ window.bellSchedule = {
                       for (var _iterator18 = _track3[Symbol.iterator](), _step18; !(_iteratorNormalCompletion18 = (_step18 = _iterator18.next()).done); _iteratorNormalCompletion18 = true) {
                         var _p3 = _step18.value;
 
-                        if (period === _p3) {
-                          return innerLast;
+                        if (passing || _p3.name) {
+                          if (check(_p3, innerLast)) {
+                            return _p3;
+                          }
                         }
                         innerLast = _p3;
                       }
@@ -920,6 +939,8 @@ window.bellSchedule = {
       }
     };
   },
+
+  /* Gets the period(s) at a specific time */
   at: function at(time) {
     return this.for(time).at(time);
   }

@@ -63,14 +63,14 @@ test('Error when schedule not fetched yet', function (ft) {
       console.log('Date is ' + date.toString());
       st.equal([].concat(_toConsumableArray(bellSchedule.at(date))).length, 2, 'Number of periods is 2');
 
-      // At 1:50, it should be a passing periods
+      // At 1:50, it should be a passing period
       date.setHours(13, 50);
       console.log('Date is now ' + date.toString());
       st.equal(bellSchedule.at(date).next().value.name, null, 'Is a Passing period');
     });
-    test('Next function works', function (st) {
+    test('After function works', function (st) {
       st.plan(1);
-      // Again, last monday
+      // Again, last Monday
       var date = new Date();
       date.setDate(date.getDate() + (date.getDay() === 0 ? -6 : 1 - date.getDay()));
       // Now get the schedule for that date
@@ -81,14 +81,14 @@ test('Error when schedule not fetched yet', function (ft) {
     });
     test('Before function works', function (st) {
       st.plan(1);
-      // Again, last monday
+      // Again, last Monday
       var date = new Date();
       date.setDate(date.getDate() + (date.getDay() === 0 ? -6 : 1 - date.getDay()));
       // Now get the schedule for that date
       var sch = bellSchedule.for(date);
       var period1 = sch.schedule[0];
       var period2 = sch.schedule[1];
-      st.equal(sch.before(period2), period1, 'Second period comes after the first one');
+      st.equal(sch.before(period2), period1, 'First period comes before the second one');
     });
   });
 });

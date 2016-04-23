@@ -227,24 +227,30 @@ window.bellSchedule = {
             if (period.start <= time && time < period.end) yield period;
           }
         },
-        /* Gets the period after the given one */
-        before(period) {
+        /* Gets the period before the given one */
+        before(period, passing = true) {
           let lastPeriod;
           for (const per of this.schedule) {
             if (per.type === 'period') {
-              if (period === lastPeriod || ~lastPeriod.indexOf(period)) {
-                return per;
+              if (period === per) {
+                return lastPeriod;
               }
-              lastPeriod = per;
+              // If passing is false (no passing periods) then not a passing period
+              if (passing || per.name) {
+                lastPeriod = per;
+              }
             } else { // A group
               const a = [];
               for (const track of per.tracks) {
                 let innerLast = lastPeriod;
                 for (const p of track) {
-                  if (period === innerLast || ~innerLast.indexOf(period)) {
-                    return p;
+                  // Period could be a passing period, so this shouldn't go inside the if below
+                  if (period === p) {
+                    return innerLast;
                   }
-                  innerLast = p;
+                  if (passing || p.name) {
+                    innerLast = p;
+                  }
                 }
                 a.push(innerLast);
               }
@@ -254,21 +260,30 @@ window.bellSchedule = {
           return null;
         },
         /* Gets the period after the given one */
-        after(period) {
+        after(period, passing = true) {
+          function check(i, a) {
+            return i && (i === a || (i.indexOf && ~i.indexOf(a)));
+          }
           let lastPeriod;
           for (const per of this.schedule) {
             if (per.type === 'period') {
-              if (period === per) {
-                return lastPeriod;
+              // If passing is false (no passing periods) then not a passing period
+              if (passing || per.name) {
+                if (check(lastPeriod, period)) {
+                  return per;
+                }
               }
+              // This goes outside because period could be a passing period
               lastPeriod = per;
             } else { // A group
               const a = [];
               for (const track of per.tracks) {
                 let innerLast = lastPeriod;
                 for (const p of track) {
-                  if (period === p) {
-                    return innerLast;
+                  if (passing || p.name) {
+                    if (check(p, innerLast)) {
+                      return p;
+                    }
                   }
                   innerLast = p;
                 }

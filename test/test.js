@@ -52,7 +52,7 @@ test('Error when schedule not fetched yet', (ft) => {
       console.log(`Date is now ${date.toString()}`);
       st.equal(bellSchedule.at(date).next().value.name, null, 'Is a Passing period');
     });
-    test('Next function works', (st) => {
+    test('After function works', (st) => {
       st.plan(1);
       // Again, last Monday
       const date = new Date();
@@ -72,7 +72,7 @@ test('Error when schedule not fetched yet', (ft) => {
       const sch = bellSchedule.for(date);
       const period1 = sch.schedule[0];
       const period2 = sch.schedule[1];
-      st.equal(sch.before(period2), period1, 'Second period comes after the first one');
+      st.equal(sch.before(period2), period1, 'First period comes before the second one');
     });
   });
 });
