@@ -1,3 +1,93 @@
+const scheduleProto = {
+  /* Yields all periods in a schedule (expanding groups) */
+  * periods() {
+    for (const per of this.schedule) {
+      if (per.type === 'period') {
+        yield per;
+      } else { // A group
+        for (const track of per.tracks) {
+          for (const p of track) {
+            yield p;
+          }
+        }
+      }
+    }
+  },
+  /* Gets the period(s) at a specific time */
+  * at(time) {
+    for (const period of this.periods()) {
+      if (period.start <= time && time < period.end) yield period;
+    }
+  },
+  /* Gets the period before the given one */
+  before(period, passing = true) {
+    let lastPeriod;
+    for (const per of this.schedule) {
+      if (per.type === 'period') {
+        if (period === per) {
+          return lastPeriod;
+        }
+        // If passing is false (no passing periods) then not a passing period
+        if (passing || per.name) {
+          lastPeriod = per;
+        }
+      } else { // A group
+        const a = [];
+        for (const track of per.tracks) {
+          let innerLast = lastPeriod;
+          for (const p of track) {
+            // Period could be a passing period, so this shouldn't go inside the if below
+            if (period === p) {
+              return innerLast;
+            }
+            if (passing || p.name) {
+              innerLast = p;
+            }
+          }
+          a.push(innerLast);
+        }
+        lastPeriod = a;
+      }
+    }
+    return null;
+  },
+  /* Gets the period after the given one */
+  after(period, passing = true) {
+    function check(i, a) {
+      return i && (i === a || (i.indexOf && ~i.indexOf(a)));
+    }
+    let lastPeriod;
+    for (const per of this.schedule) {
+      if (per.type === 'period') {
+        // If passing is false (no passing periods) then not a passing period
+        if (passing || per.name) {
+          if (check(lastPeriod, period)) {
+            return per;
+          }
+        }
+        // This goes outside because period could be a passing period
+        lastPeriod = per;
+      } else { // A group
+        const a = [];
+        for (const track of per.tracks) {
+          let innerLast = lastPeriod;
+          for (const p of track) {
+            if (passing || p.name) {
+              if (check(p, innerLast)) {
+                return p;
+              }
+            }
+            innerLast = p;
+          }
+          a.push(innerLast);
+        }
+        lastPeriod = a;
+      }
+    }
+    return null;
+  },
+};
+
 window.bellSchedule = {
   index: null,
   schedules: null,
@@ -151,6 +241,9 @@ window.bellSchedule = {
     d.setHours(0, 0, 0, 0);
     const special = this.index.get(d.getTime());
     if (special) { // There is a special schedule for the day
+      // Below is probably when it is a holiday when there is no school.
+      if (!this.schedules.has(special.schedule)) return { special: true, schedule: [], __proto__: scheduleProto };
+
       const ret = JSON.parse(JSON.stringify(this.schedules.get(special.schedule))); // Deep clone
       // Now replace period names specified in the mapping and convert the times into date objects
       // Loop through the periods of the schedule
@@ -177,6 +270,7 @@ window.bellSchedule = {
       return {
         special: true,
         schedule: ret,
+        __proto__: scheduleProto,
       };
     }
     // No special schedule for the day
@@ -185,6 +279,7 @@ window.bellSchedule = {
       return {
         special: false,
         schedule: [],
+        __proto__: scheduleProto,
       };
     }
     // Normal schedules are designated by O${day}
@@ -206,95 +301,7 @@ window.bellSchedule = {
     return {
       special: false,
       schedule: ret,
-      __proto__: {
-        /* Yields all periods in a schedule (expanding groups) */
-        * periods() {
-          for (const per of this.schedule) {
-            if (per.type === 'period') {
-              yield per;
-            } else { // A group
-              for (const track of per.tracks) {
-                for (const p of track) {
-                  yield p;
-                }
-              }
-            }
-          }
-        },
-        /* Gets the period(s) at a specific time */
-        * at(time) {
-          for (const period of this.periods()) {
-            if (period.start <= time && time < period.end) yield period;
-          }
-        },
-        /* Gets the period before the given one */
-        before(period, passing = true) {
-          let lastPeriod;
-          for (const per of this.schedule) {
-            if (per.type === 'period') {
-              if (period === per) {
-                return lastPeriod;
-              }
-              // If passing is false (no passing periods) then not a passing period
-              if (passing || per.name) {
-                lastPeriod = per;
-              }
-            } else { // A group
-              const a = [];
-              for (const track of per.tracks) {
-                let innerLast = lastPeriod;
-                for (const p of track) {
-                  // Period could be a passing period, so this shouldn't go inside the if below
-                  if (period === p) {
-                    return innerLast;
-                  }
-                  if (passing || p.name) {
-                    innerLast = p;
-                  }
-                }
-                a.push(innerLast);
-              }
-              lastPeriod = a;
-            }
-          }
-          return null;
-        },
-        /* Gets the period after the given one */
-        after(period, passing = true) {
-          function check(i, a) {
-            return i && (i === a || (i.indexOf && ~i.indexOf(a)));
-          }
-          let lastPeriod;
-          for (const per of this.schedule) {
-            if (per.type === 'period') {
-              // If passing is false (no passing periods) then not a passing period
-              if (passing || per.name) {
-                if (check(lastPeriod, period)) {
-                  return per;
-                }
-              }
-              // This goes outside because period could be a passing period
-              lastPeriod = per;
-            } else { // A group
-              const a = [];
-              for (const track of per.tracks) {
-                let innerLast = lastPeriod;
-                for (const p of track) {
-                  if (passing || p.name) {
-                    if (check(p, innerLast)) {
-                      return p;
-                    }
-                  }
-                  innerLast = p;
-                }
-                a.push(innerLast);
-              }
-              lastPeriod = a;
-            }
-          }
-          return null;
-        },
-      },
+      __proto__: scheduleProto,
     };
   },
   /* Gets the period(s) at a specific time */

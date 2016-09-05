@@ -38,14 +38,16 @@ test('Error when schedule not fetched yet', (ft) => {
       }
     });
     test('At function works', (st) => {
-      st.plan(2);
+      st.plan(1);
       // Get the last Monday
       const date = new Date();
       date.setDate(date.getDate() + (date.getDay() === 0 ? -6 : 1 - date.getDay()));
+      /* With the new block schedule this is irrelevant
       // At 11:45, there should be two periods
       date.setHours(11, 45, 0, 0);
       console.log(`Date is ${date.toString()}`);
       st.equal([...bellSchedule.at(date)].length, 2, 'Number of periods is 2');
+      */
 
       // At 1:50, it should be a passing period
       date.setHours(13, 50);

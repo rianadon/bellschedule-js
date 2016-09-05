@@ -16,11 +16,11 @@ There are two (technically three) versions of the script.
 
 #### Estimated compatibility (from http://kangax.github.io/compat-table/es6 and testing)
 
-|     Edge     |                 Firefox                  |                Chrome               |                     Safari                     | Any mobile browser |
-|:------------:|:----------------------------------------:|:-----------------------------------:|:----------------------------------------------:|:------------------:|
-| 13+ (latest) | None - doesn't like `for (const x of y)` | 49+ (old version; latest will work) | None - doesn't support many of ES2015 features |   Most likely not  |
+|     Edge     |                 Firefox                  |                Chrome               |    Safari    |
+|:------------:|:----------------------------------------:|:-----------------------------------:|:------------:|
+| 13+ (latest) | None - doesn't like `for (const x of y)` | 49+ (old version; latest will work) | 10+ (latest) |
 
-So, if you want to support any browser that isn't Chrome or Edge, I'd suggest using the compiled version :cry:.
+So, if you want to support Firefox or any older version of a browser, I'd suggest using the compiled version :cry:.
 
 ### Usage
 
